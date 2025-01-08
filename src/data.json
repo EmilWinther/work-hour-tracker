@@ -1,0 +1,20 @@
+[
+  {
+    "weekNumber": 2,
+    "monday": null,
+    "tuesday": 7.44,
+    "wednesday": 7.44,
+    "thursday": null,
+    "friday": null,
+    "lastUpdated": "2025-01-08T18:14:19.504Z"
+  },
+  {
+    "weekNumber": 3,
+    "monday": null,
+    "tuesday": null,
+    "wednesday": null,
+    "thursday": 7.44,
+    "friday": null,
+    "lastUpdated": "2025-01-08T16:53:54.743Z"
+  }
+]

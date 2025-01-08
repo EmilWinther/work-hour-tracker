@@ -1,0 +1,442 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Time Tracker</title>
+    <style>
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --bg-tertiary: #363636;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --accent-primary: #4CAF50;
+            --accent-hover: #45a049;
+            --error-color: #ff4444;
+            --input-bg: #404040;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            --highlight-bg: #2c3e50;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            color: var(--text-primary);
+            text-align: center;
+            font-weight: 300;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin: 2rem 0;
+            color: var(--text-primary);
+            font-weight: 300;
+        }
+
+        .input-card {
+            background-color: var(--bg-secondary);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .form-group label {
+            min-width: 120px;
+            color: var(--text-secondary);
+        }
+
+        input[type="number"] {
+            background-color: var(--input-bg);
+            border: 1px solid var(--bg-tertiary);
+            color: var(--text-primary);
+            padding: 0.8rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            width: 120px;
+            transition: all 0.3s ease;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+
+        button {
+            background-color: var(--accent-primary);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        #loadCurrentWeek {
+            background-color: var(--bg-tertiary);
+            margin-left: 1rem;
+        }
+
+        #loadCurrentWeek:hover {
+            background-color: var(--highlight-bg);
+        }
+
+        .week-entry {
+            background-color: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .week-entry:hover {
+            transform: translateY(-2px);
+        }
+
+        .week-entry h3 {
+            color: var(--accent-primary);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .current-week {
+            background-color: var(--highlight-bg);
+            border-left: 4px solid var(--accent-primary);
+        }
+
+        .day-value {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--bg-tertiary);
+        }
+
+        .day-value:last-child {
+            border-bottom: none;
+        }
+
+        .total {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 2px solid var(--bg-tertiary);
+            font-weight: bold;
+            color: var(--accent-primary);
+        }
+
+        .last-updated {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        .auto-save {
+            margin-left: 1rem;
+            font-size: 0.9rem;
+            color: var(--accent-primary);
+            min-width: 80px;
+            display: inline-block;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .form-group {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            input[type="number"] {
+                width: 100%;
+            }
+
+            .auto-save {
+                margin-left: 0;
+                margin-top: 0.5rem;
+            }
+        }
+
+        .week-actions {
+            margin-top: 1rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-delete {
+            background-color: #dc3545;
+        }
+
+        .btn-delete:hover {
+            background-color: #c82333;
+        }
+
+        .btn-edit {
+            background-color: #0d6efd;
+        }
+
+        .btn-edit:hover {
+            background-color: #0b5ed7;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Weekly Time Tracker</h1>
+
+        <div class="input-card">
+            <form id="timeForm">
+                <div class="form-group">
+                    <label for="weekNumber">Week Number</label>
+                    <input type="number" id="weekNumber" required>
+                    <button type="button" id="loadCurrentWeek">Load Current Week</button>
+                </div>
+                <div class="form-group">
+                    <label for="monday">Monday</label>
+                    <input type="number" id="monday" step="0.01" placeholder="0.00">
+                    <span class="auto-save" id="mondayStatus"></span>
+                </div>
+                <div class="form-group">
+                    <label for="tuesday">Tuesday</label>
+                    <input type="number" id="tuesday" step="0.01" placeholder="0.00">
+                    <span class="auto-save" id="tuesdayStatus"></span>
+                </div>
+                <div class="form-group">
+                    <label for="wednesday">Wednesday</label>
+                    <input type="number" id="wednesday" step="0.01" placeholder="0.00">
+                    <span class="auto-save" id="wednesdayStatus"></span>
+                </div>
+                <div class="form-group">
+                    <label for="thursday">Thursday</label>
+                    <input type="number" id="thursday" step="0.01" placeholder="0.00">
+                    <span class="auto-save" id="thursdayStatus"></span>
+                </div>
+                <div class="form-group">
+                    <label for="friday">Friday</label>
+                    <input type="number" id="friday" step="0.01" placeholder="0.00">
+                    <span class="auto-save" id="fridayStatus"></span>
+                </div>
+                <button type="submit">Save Full Week</button>
+            </form>
+        </div>
+
+        <h2>Saved Weeks</h2>
+        <div id="weeksList"></div>
+    </div>
+
+    <script>
+        let currentWeekData = null;
+        let autoSaveTimeout = null;
+
+        async function loadWeeks() {
+            const response = await fetch('/api/weeks');
+            const weeks = await response.json();
+
+            const weeksList = document.getElementById('weeksList');
+            weeksList.innerHTML = '';
+
+            weeks.sort((a, b) => b.weekNumber - a.weekNumber)
+                .forEach(week => {
+                    const total = Object.entries(week)
+                        .filter(([key]) => ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'].includes(key))
+                        .reduce((sum, [_, value]) => sum + (value || 0), 0);
+
+                    const weekDiv = document.createElement('div');
+                    weekDiv.className = 'week-entry' + (week.weekNumber === currentWeekData?.weekNumber ? ' current-week' : '');
+
+                    const days = [
+                        ['Monday', week.monday],
+                        ['Tuesday', week.tuesday],
+                        ['Wednesday', week.wednesday],
+                        ['Thursday', week.thursday],
+                        ['Friday', week.friday]
+                    ].map(([day, hours]) => `
+                <div class="day-value">
+                    <span>${day}</span>
+                    <span>${hours ?? '-'} ${hours ? 'hours' : ''}</span>
+                </div>
+            `).join('');
+
+                    weekDiv.innerHTML = `
+                <h3>Week ${week.weekNumber}</h3>
+                ${days}
+                <div class="total">Total Hours: ${total.toFixed(2)}</div>
+                <div class="last-updated">Last updated: ${new Date(week.lastUpdated).toLocaleString()}</div>
+                <div class="week-actions">
+                    <button class="btn-edit" onclick="editWeek(${week.weekNumber})">Edit</button>
+                    <button class="btn-delete" onclick="deleteWeek(${week.weekNumber})">Delete</button>
+                </div>
+            `;
+                    weeksList.appendChild(weekDiv);
+                });
+        }
+
+        // Add these new functions
+        async function deleteWeek(weekNumber) {
+            if (!confirm(`Are you sure you want to delete Week ${weekNumber}?`)) {
+                return;
+            }
+
+            try {
+                await fetch(`/api/weeks/${weekNumber}`, {
+                    method: 'DELETE'
+                });
+                await loadWeeks();
+            } catch (error) {
+                console.error('Failed to delete week:', error);
+                alert('Failed to delete week');
+            }
+        }
+
+        async function editWeek(weekNumber) {
+            // Get all weeks' data to find the one we want to edit
+            const response = await fetch('/api/weeks');
+            const weeks = await response.json();
+            const weekToEdit = weeks.find(w => w.weekNumber === weekNumber);
+
+            if (!weekToEdit) return;
+
+            // Set the form values
+            document.getElementById('weekNumber').value = weekNumber;
+
+            // Set each day's value
+            ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'].forEach(day => {
+                const value = weekToEdit[day];
+                document.getElementById(day).value = value ?? '';
+            });
+
+            // Scroll to top of the page smoothly
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Load current week data
+        async function loadCurrentWeek() {
+            const response = await fetch('/api/current-week');
+            currentWeekData = await response.json();
+
+            document.getElementById('weekNumber').value = currentWeekData.weekNumber;
+            document.getElementById('monday').value = currentWeekData.monday || '';
+            document.getElementById('tuesday').value = currentWeekData.tuesday || '';
+            document.getElementById('wednesday').value = currentWeekData.wednesday || '';
+            document.getElementById('thursday').value = currentWeekData.thursday || '';
+            document.getElementById('friday').value = currentWeekData.friday || '';
+
+            await loadWeeks();
+        }
+
+        // Auto-save function
+        async function autoSave(field) {
+            clearTimeout(autoSaveTimeout);
+
+            const statusElement = document.getElementById(`${field}Status`);
+            statusElement.textContent = 'Saving...';
+
+            autoSaveTimeout = setTimeout(async () => {
+                const weekNumber = parseInt(document.getElementById('weekNumber').value);
+                const value = document.getElementById(field).value;
+
+                try {
+                    await fetch('/api/weeks', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            weekNumber,
+                            [field]: value ? parseFloat(value) : null
+                        })
+                    });
+
+                    statusElement.textContent = '✓ Saved';
+                    setTimeout(() => {
+                        statusElement.textContent = '';
+                    }, 2000);
+
+                    await loadWeeks();
+                } catch (error) {
+                    statusElement.textContent = '❌ Error';
+                    console.error('Failed to auto-save:', error);
+                }
+            }, 1000);
+        }
+
+        // Set up event listeners
+        document.getElementById('loadCurrentWeek').addEventListener('click', loadCurrentWeek);
+
+        ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'].forEach(day => {
+            document.getElementById(day).addEventListener('input', () => autoSave(day));
+        });
+
+        document.getElementById('timeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const weekData = {
+                weekNumber: parseInt(document.getElementById('weekNumber').value),
+                monday: document.getElementById('monday').value ? parseFloat(document.getElementById('monday').value) : null,
+                tuesday: document.getElementById('tuesday').value ? parseFloat(document.getElementById('tuesday').value) : null,
+                wednesday: document.getElementById('wednesday').value ? parseFloat(document.getElementById('wednesday').value) : null,
+                thursday: document.getElementById('thursday').value ? parseFloat(document.getElementById('thursday').value) : null,
+                friday: document.getElementById('friday').value ? parseFloat(document.getElementById('friday').value) : null
+            };
+
+            try {
+                await fetch('/api/weeks', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(weekData)
+                });
+
+                await loadWeeks();
+            } catch (error) {
+                console.error('Failed to save week:', error);
+                alert('Failed to save week');
+            }
+        });
+
+        loadCurrentWeek();
+
+    </script>
+</body>
+
+</html>
